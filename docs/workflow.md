@@ -6,13 +6,13 @@
 
 | Gate | 主要任务 | 状态记录 | 优先 Skill |
 |---|---|---|---|
-| G1 | 现实机制、证据边界、子问题依赖和接口 | `model_cards.md` | `math-modeling-skill-pro` |
-| G2 | 假设、证据、偏差方向和压力测试 | `assumptions.md` | `math-modeling-skill-pro` |
+| G1 | 现实机制、证据边界、子问题依赖和接口 | `model_cards.md` | `math-modeling-skill` |
+| G2 | 假设、证据、偏差方向和压力测试 | `assumptions.md` | `math-modeling-skill` |
 | G3 | A/B/C 候选、baseline 和选择理由 | `model_cards.md` | Pro；必要时 `math-modeling-solver` |
 | G4 | 输入到下游决策的实现链 | `implementation_cards.md` | `math-modeling-solver`；Pro 做审计 |
 | Execution | 训练、求解、仿真和结果保存 | 项目代码与结果 | `math-modeling-solver` |
 | G5 | 正确性、经验证据、对比、消融和不确定性 | `validation_and_limits.md` | Pro；必要时 Solver |
-| G6 | 优点、限制和安全决策边界 | `validation_and_limits.md` | `math-modeling-skill-pro` |
+| G6 | 优点、限制和安全决策边界 | `validation_and_limits.md` | `math-modeling-skill` |
 | Paper | 摘要、论文、图表、Memo/Letter 和格式 | 已验证 modeling 记录 | `math-modeling-paper` |
 
 `优先 Skill` 不是硬绑定。Codex 根据当前问题决定是否调用；不需要的 references 不预加载。
@@ -42,7 +42,7 @@
 
 ### 调用
 
-优先使用 `math-modeling-skill-pro` 做证据边界、机制和依赖分析。需要方法名时只读取 Solver 的相关决策矩阵，不提前加载全部 Cookbook。
+优先使用 `math-modeling-skill` 做证据边界、机制和依赖分析；其 source repo 为 `skillforCUMCM/math-modeling-skill-pro`。需要方法名时只读取 Solver 的相关决策矩阵，不提前加载全部 Cookbook。
 
 ## G2 — 假设
 

@@ -4,7 +4,7 @@
 
 本项目不创建第三个数学建模 Skill，也不合并或复制上游 Skill。`Codex + AGENTS.md` 负责判断阶段和路由；上游入口按需调用：
 
-- `math-modeling-skill-pro`：现实机制、证据边界、子问题依赖、历史案例结构检索、候选模型比较和建模审计；
+- `math-modeling-skill`（source repo: `skillforCUMCM/math-modeling-skill-pro`）：现实机制、证据边界、子问题依赖、历史案例结构检索、候选模型比较和建模审计；
 - `math-modeling-solver`：具体方法、算法 Cookbook、Python/MATLAB 模板、solver 和实现验证；
 - `math-modeling-paper`：论文、摘要、图表、Memo/Letter 和格式支持。
 
@@ -72,8 +72,15 @@ G3 的 A/B/C 是主要建模决策的比较框架，不是对每个简单步骤�
 ├── AGENTS.md
 ├── README.md
 ├── docs/
+│   ├── bootstrap.md
 │   ├── bootstrap-smoke-test.md
+│   ├── full-dry-run-2023-c.md
 │   └── workflow.md
+├── scripts/
+│   ├── bootstrap.ps1
+│   ├── extract_cumcm2023c_sales.py
+│   ├── full_dry_run.py
+│   └── smoke_test_milp.py
 └── modeling/
     ├── assumptions.md
     ├── model_cards.md
@@ -81,7 +88,7 @@ G3 的 A/B/C 是主要建模决策的比较框架，不是对每个简单步骤�
     └── validation_and_limits.md
 ```
 
-新比赛使用的 `data/`、`src/`、`results/`、`figures/` 和 `paper/` 目录按实际需要创建，本项目不强制生成空目录。
+首次在新机器上使用前，先运行 `docs/bootstrap.md` 中的 Bootstrap 检查或安装命令。新比赛使用的 `data/`、`src/`、`results/`、`figures/` 和 `paper/` 目录按实际需要创建，本项目不强制生成空目录。
 
 ## 工作方式
 
@@ -101,4 +108,4 @@ G3 的 A/B/C 是主要建模决策的比较框架，不是对每个简单步骤�
 
 ## 当前环境说明
 
-Bootstrap Smoke Test 已记录在 [`docs/bootstrap-smoke-test.md`](docs/bootstrap-smoke-test.md)。上游 Solver 的 MILP 模板静态语法检查通过；当前执行 Python 缺少 `scipy`，因此直接运行模板需要先补齐外部环境依赖。该依赖不进入本项目。
+Bootstrap Smoke Test 已记录在 [`docs/bootstrap-smoke-test.md`](docs/bootstrap-smoke-test.md)，真实附件 Full Dry Run 已记录在 [`docs/full-dry-run-2023-c.md`](docs/full-dry-run-2023-c.md)。上游 Solver 的 MILP 模板已在临时环境中实际运行；`scipy`、`pulp` 和 `openpyxl` 仅作为外部 Smoke Test 依赖，不进入本项目。

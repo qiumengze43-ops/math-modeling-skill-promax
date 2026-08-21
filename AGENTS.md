@@ -5,7 +5,7 @@ This repository is a project-local orchestration layer for CUMCM, MCM, and ICM m
 ## Orchestrator and upstream Skill routing
 
 1. Codex plus this `AGENTS.md` is the orchestrator. It decides the current gate, required artifacts, and which upstream capability is needed.
-2. Invoke `math-modeling-skill-pro` for evidence-boundary analysis, real-world mechanism and dependency analysis, structurally similar case retrieval, candidate-model comparison, modeling audit, validation/sensitivity planning, and defensible innovation planning.
+2. Invoke `math-modeling-skill` for evidence-boundary analysis, real-world mechanism and dependency analysis, structurally similar case retrieval, candidate-model comparison, modeling audit, validation/sensitivity planning, and defensible innovation planning. Its source repository is `skillforCUMCM/math-modeling-skill-pro`.
 3. Invoke `math-modeling-solver` for detailed method references, algorithm cookbooks, Python/MATLAB scaffolds, solver guidance, and implementation-oriented validation methods.
 4. Invoke `math-modeling-paper` for paper structure, abstract, figures, memo/letter, citation, formatting, and final writing support after the modeling record is ready.
 5. Invoke upstream Skills directly. Do not merge them, reproduce their references locally, or preload their complete case/reference collections.
