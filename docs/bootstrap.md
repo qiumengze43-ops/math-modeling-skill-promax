@@ -12,7 +12,7 @@
 
 ## Windows 使用
 
-在项目根目录运行：
+在项目根目录运行。默认检查和安装目录是 `C:\Users\<user>\.agents\skills`：
 
 ```powershell
 .\scripts\bootstrap.ps1
@@ -30,7 +30,13 @@
 .\scripts\bootstrap.ps1 -InstallMissing
 ```
 
-也可以显式指定 Skill 根目录，便于测试或非默认 Codex 安装：
+也可以显式指定 Skill 根目录，便于测试、非默认 Codex 安装或旧版 `.codex` 目录：
+
+```powershell
+.\scripts\bootstrap.ps1 -SkillsRoot 'C:\Users\<user>\.agents\skills'
+```
+
+旧版目录仍可显式检查：
 
 ```powershell
 .\scripts\bootstrap.ps1 -SkillsRoot 'C:\Users\<user>\.codex\skills'

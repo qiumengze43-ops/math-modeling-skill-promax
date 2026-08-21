@@ -1,6 +1,6 @@
 [CmdletBinding()]
 param(
-    [string]$SkillsRoot = (Join-Path $env:USERPROFILE '.codex\skills'),
+    [string]$SkillsRoot = (Join-Path $env:USERPROFILE '.agents\skills'),
     [switch]$InstallMissing
 )
 

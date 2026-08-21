@@ -28,6 +28,10 @@ jobs:
         shell: pwsh
         run: ./scripts/test_bootstrap.ps1
 
+      - name: Check Bootstrap default root
+        shell: pwsh
+        run: ./scripts/test_bootstrap_default_root.ps1
+
       - name: Check diff formatting
         shell: pwsh
         run: git diff --check
