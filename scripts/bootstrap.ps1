@@ -42,7 +42,17 @@ function Install-Skill([hashtable]$definition) {
             throw "Destination already exists but failed validation: $destination"
         }
         New-Item -ItemType Directory -Force -Path $SkillsRoot | Out-Null
-        git clone --depth 1 ("https://github.com/{0}.git" -f $definition.Repo) $repoRoot
+        $previousErrorAction = $ErrorActionPreference
+        try {
+            $ErrorActionPreference = 'Continue'
+            $cloneOutput = @(& git clone --depth 1 ("https://github.com/{0}.git" -f $definition.Repo) $repoRoot 2>&1)
+        }
+        finally {
+            $ErrorActionPreference = $previousErrorAction
+        }
+        if ($LASTEXITCODE -ne 0) {
+            throw "Git clone failed for $($definition.Repo): $($cloneOutput -join "`n")"
+        }
         $source = if ($definition.SourcePath -eq '.') { $repoRoot } else { Join-Path $repoRoot $definition.SourcePath }
         if (-not (Test-Path -LiteralPath (Join-Path $source 'SKILL.md'))) {
             throw "SKILL.md not found at $source"

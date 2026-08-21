@@ -80,7 +80,10 @@ G3 的 A/B/C 是主要建模决策的比较框架，不是对每个简单步骤�
 │   ├── bootstrap.ps1
 │   ├── extract_cumcm2023c_sales.py
 │   ├── full_dry_run.py
-│   └── smoke_test_milp.py
+│   ├── smoke_test_milp.py
+│   ├── test_bootstrap.ps1
+│   ├── test_bootstrap_install.ps1
+│   └── test_full_dry_run.py
 └── modeling/
     ├── assumptions.md
     ├── model_cards.md

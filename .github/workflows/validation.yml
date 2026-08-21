@@ -1,0 +1,33 @@
+name: validation
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  tests:
+    runs-on: windows-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Run Python tests
+        shell: pwsh
+        run: python -m unittest discover -s scripts -p 'test_full_dry_run.py'
+
+      - name: Compile Python scripts
+        shell: pwsh
+        run: python -m py_compile scripts/extract_cumcm2023c_sales.py scripts/full_dry_run.py scripts/smoke_test_milp.py scripts/test_full_dry_run.py
+
+      - name: Run Bootstrap missing-entry test
+        shell: pwsh
+        run: ./scripts/test_bootstrap.ps1
+
+      - name: Check diff formatting
+        shell: pwsh
+        run: git diff --check

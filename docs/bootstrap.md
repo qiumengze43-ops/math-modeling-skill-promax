@@ -49,6 +49,13 @@
 Bootstrap 只验证 Skill 可发现性。Solver 的实际执行验证见 [`bootstrap-smoke-test.md`](bootstrap-smoke-test.md)；它使用临时 Python 环境安装 `scipy`、`pulp`、`openpyxl`，不会修改项目依赖。
 
 真实附件 Full Dry Run 见 [`full-dry-run-2023-c.md`](full-dry-run-2023-c.md)。
+完整安装分支可在本机用临时 Skill 根目录验证，测试会联网克隆并在结束时清理临时目录：
+
+```powershell
+.\scripts\test_bootstrap_install.ps1
+```
+
+仓库 CI 会运行 Python 单元测试、脚本编译、Bootstrap 缺失测试和 `git diff --check`；真实安装测试保留为本机显式运行，避免 CI 因外部 GitHub 网络或上游仓库暂时不可用而误报。
 
 ## 前置条件与限制
 
