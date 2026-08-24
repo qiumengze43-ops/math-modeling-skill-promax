@@ -1,29 +1,21 @@
 $ErrorActionPreference = 'Stop'
-$skillsRoot = Join-Path ([System.IO.Path]::GetTempPath()) ('bootstrap-install-test-' + [guid]::NewGuid().ToString('N'))
+
+$projectRoot = Split-Path -Parent $PSScriptRoot
 $bootstrap = Join-Path $PSScriptRoot 'bootstrap.ps1'
-$expected = @{
-    'math-modeling-skill' = 'math-modeling-skill'
-    'math-modeling-solver' = 'math-modeling-solver'
-    'math-modeling-paper' = 'math-modeling-paper'
-}
+$skillsRoot = Join-Path ([System.IO.Path]::GetTempPath()) ('bootstrap-register-test-' + [guid]::NewGuid().ToString('N'))
+
 try {
     New-Item -ItemType Directory -Force -Path $skillsRoot | Out-Null
-    $output = @(& $bootstrap -SkillsRoot $skillsRoot -InstallMissing 2>&1)
-    if ($LASTEXITCODE -ne 0) {
-        throw "Bootstrap install failed with exit code $LASTEXITCODE`n$($output -join "`n")"
-    }
-    $joined = $output -join "`n"
+    $output = @(& $bootstrap -ProjectRoot $projectRoot -SkillsRoot $skillsRoot -Register 2>&1)
+    $joined = $output -join [Environment]::NewLine
     if ($joined -notmatch '3/3 READY') {
-        throw "Bootstrap install did not report 3/3 READY`n$joined"
+        throw ("Bootstrap registration did not report 3/3 READY{0}{1}" -f [Environment]::NewLine, $joined)
     }
-    foreach ($directory in $expected.Keys) {
-        $skillFile = Join-Path (Join-Path $skillsRoot $directory) 'SKILL.md'
-        if (-not (Test-Path -LiteralPath $skillFile)) {
-            throw "Missing installed SKILL.md: $skillFile"
-        }
-        $nameMatch = Select-String -LiteralPath $skillFile -Pattern '^name:\s*(.+?)\s*$' | Select-Object -First 1
-        if (-not $nameMatch -or $nameMatch.Matches[0].Groups[1].Value.Trim() -ne $expected[$directory]) {
-            throw "Installed Skill name mismatch: $skillFile"
+    foreach ($name in @('math-modeling-skill', 'math-modeling-solver', 'math-modeling-paper')) {
+        $destination = Join-Path $skillsRoot $name
+        $item = Get-Item -LiteralPath $destination -Force
+        if ($item.LinkType -ne 'Junction') {
+            throw "Registered Skill is not a junction: $destination"
         }
     }
 }
@@ -32,4 +24,6 @@ finally {
         Remove-Item -LiteralPath $skillsRoot -Recurse -Force
     }
 }
-Write-Output 'BOOTSTRAP_INSTALL_CHECK_PASS'
+
+Write-Output 'BOOTSTRAP_REGISTER_CHECK_PASS'
+

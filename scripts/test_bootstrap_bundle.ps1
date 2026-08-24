@@ -11,11 +11,23 @@ $definitions = @(
     @{ Name = 'math-modeling-paper'; RelativePath = 'upstream-skills\math-modeling-skills\skills\math-modeling-paper' }
 )
 
-function Invoke-Bootstrap([string[]]$arguments) {
-    $output = @(& $bootstrap @arguments 2>&1)
+function Invoke-Bootstrap([string]$SourceRoot, [string]$DiscoveryRoot, [bool]$DoRegister) {
+    try {
+        if ($DoRegister) {
+            $output = @(& $bootstrap -ProjectRoot $SourceRoot -SkillsRoot $DiscoveryRoot -Register 2>&1)
+        }
+        else {
+            $output = @(& $bootstrap -ProjectRoot $SourceRoot -SkillsRoot $DiscoveryRoot 2>&1)
+        }
+    }
+    catch {
+        $output = @($_)
+    }
+    $joined = $output -join [Environment]::NewLine
+    $exitCode = if ($joined -match '3/3 READY') { 0 } else { 1 }
     [pscustomobject]@{
-        Output = ($output -join "`n")
-        ExitCode = if ($null -eq $LASTEXITCODE) { 0 } else { $LASTEXITCODE }
+        Output = $joined
+        ExitCode = $exitCode
     }
 }
 
@@ -34,12 +46,12 @@ description: fixture
     }
     New-Item -ItemType Directory -Force -Path $skillsRoot | Out-Null
 
-    $readOnly = Invoke-Bootstrap @('-ProjectRoot', $fixtureRoot, '-SkillsRoot', $skillsRoot)
+    $readOnly = Invoke-Bootstrap $fixtureRoot $skillsRoot $false
     if ($readOnly.ExitCode -eq 0) {
         throw "Read-only bootstrap unexpectedly passed: $($readOnly.Output)"
     }
 
-    $registered = Invoke-Bootstrap @('-ProjectRoot', $fixtureRoot, '-SkillsRoot', $skillsRoot, '-Register')
+    $registered = Invoke-Bootstrap $fixtureRoot $skillsRoot $true
     if ($registered.ExitCode -ne 0 -or $registered.Output -notmatch '3/3 READY') {
         throw "Bootstrap registration failed: $($registered.Output)"
     }
@@ -52,7 +64,7 @@ description: fixture
         }
     }
 
-    $second = Invoke-Bootstrap @('-ProjectRoot', $fixtureRoot, '-SkillsRoot', $skillsRoot, '-Register')
+    $second = Invoke-Bootstrap $fixtureRoot $skillsRoot $true
     if ($second.ExitCode -ne 0 -or $second.Output -notmatch '3/3 READY') {
         throw "Repeated registration was not idempotent: $($second.Output)"
     }
@@ -64,7 +76,7 @@ description: fixture
         New-Item -ItemType Directory -Force -Path $conflictPath | Out-Null
         $marker = Join-Path $conflictPath 'keep.txt'
         Set-Content -LiteralPath $marker -Value 'preserve'
-        $conflict = Invoke-Bootstrap @('-ProjectRoot', $fixtureRoot, '-SkillsRoot', $conflictRoot, '-Register')
+        $conflict = Invoke-Bootstrap $fixtureRoot $conflictRoot $true
         if ($conflict.ExitCode -eq 0 -or $conflict.Output -notmatch 'CONFLICT') {
             throw "Bootstrap unexpectedly replaced or accepted a conflicting directory: $($conflict.Output)"
         }
@@ -82,3 +94,4 @@ finally {
 }
 
 Write-Output 'BOOTSTRAP_BUNDLE_CHECK_PASS'
+
