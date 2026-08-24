@@ -1,71 +1,61 @@
 # Cross-Machine Bootstrap
 
-本项目的 Bootstrap 只负责发现和安装三个上游 Skill 入口，不创建第三个 Skill，不复制上游知识库到当前项目。
+Promax is a Skill Bundle + Orchestrator. Bootstrap discovers the three independent upstream Skill entry points from repository-local submodules and, when explicitly requested, registers junctions in the Codex discovery directory. It does not create a fourth Skill and does not copy upstream knowledge bases into Promax.
 
-## 入口与来源
+## Repository-local sources
 
-| 实际 Skill 名 | source repository | repository path |
+| Discovery name | Local source | Upstream repository |
 |---|---|---|
-| `math-modeling-skill` | `skillforCUMCM/math-modeling-skill-pro` | repository root |
-| `math-modeling-solver` | `Lupynow/math-modeling-skills` | `skills/math-modeling-solver` |
-| `math-modeling-paper` | `Lupynow/math-modeling-skills` | `skills/math-modeling-paper` |
+| `math-modeling-skill` | `upstream-skills/math-modeling-skill` | `skillforCUMCM/math-modeling-skill-pro` |
+| `math-modeling-solver` | `upstream-skills/math-modeling-skills/skills/math-modeling-solver` | `Lupynow/math-modeling-skills` |
+| `math-modeling-paper` | `upstream-skills/math-modeling-skills/skills/math-modeling-paper` | `Lupynow/math-modeling-skills` |
 
-## Windows 使用
+The two submodule commits pin the exact upstream versions. Update a Skill by updating its submodule commit, then rerunning the local tests.
 
-在项目根目录运行。默认检查和安装目录是 `C:\Users\<user>\.agents\skills`：
+## Windows commands
+
+From the project root:
 
 ```powershell
+# Validate bundled sources and current discovery links; no network and no writes
 .\scripts\bootstrap.ps1
-```
 
-它只检查当前机器的 Codex Skill 目录，成功时输出：
+# Initialize missing submodule worktrees; may use the network
+.\scripts\bootstrap.ps1 -InitializeUpstreams
 
-```text
-3/3 READY
-```
+# Create or validate three directory junctions in the default discovery root
+.\scripts\bootstrap.ps1 -Register
 
-发现缺失时，明确允许联网安装后运行：
+# First-time setup in one command
+.\scripts\bootstrap.ps1 -InitializeUpstreams -Register
 
-```powershell
-.\scripts\bootstrap.ps1 -InstallMissing
-```
-
-也可以显式指定 Skill 根目录，便于测试、非默认 Codex 安装或旧版 `.codex` 目录：
-
-```powershell
+# Use an explicit discovery root for tests or a legacy installation
 .\scripts\bootstrap.ps1 -SkillsRoot 'C:\Users\<user>\.agents\skills'
+.\scripts\bootstrap.ps1 -SkillsRoot 'C:\Users\<user>\.codex\skills' -Register
 ```
 
-旧版目录仍可显式检查：
+The default root is `C:\Users\<user>\.agents\skills`. Ordinary validation and registration use only local files. Network access is limited to explicit submodule initialization.
+
+## Result states
+
+- `READY <name>`: the discovery entry is a junction to the expected repository-local Skill.
+- `MISSING <name>`: the source or discovery entry is absent; use `-InitializeUpstreams` for missing submodules or `-Register` for missing links.
+- `CONFLICT <name>`: an existing directory, file, broken link, or link to another target occupies the path.
+
+Bootstrap never deletes, moves, or overwrite[s] an existing discovery entry. It accepts an existing correct junction and leaves every conflict untouched. Resolve a conflict manually, then rerun the command.
+
+## Verification
+
+Run the local checks without network access:
 
 ```powershell
-.\scripts\bootstrap.ps1 -SkillsRoot 'C:\Users\<user>\.codex\skills'
-```
-
-## 安装行为
-
-- 已存在且 `SKILL.md` 的 `name:` 正确时跳过安装；
-- 缺失且未指定 `-InstallMissing` 时返回非零状态并列出缺失项；
-- 指定 `-InstallMissing` 时从表中的 GitHub 仓库克隆到临时目录，只复制对应 Skill 目录；
-- Pro 入口的实际 `SKILL.md` 名称是 `math-modeling-skill`，仓库名 `math-modeling-skill-pro` 只表示来源；
-- 不把上游 Skill、`knowledge/`、`cases/` 或完整模板库写入当前项目。
-
-## 后续 Smoke Test
-
-Bootstrap 只验证 Skill 可发现性。Solver 的实际执行验证见 [`bootstrap-smoke-test.md`](bootstrap-smoke-test.md)；它使用临时 Python 环境安装 `scipy`、`pulp`、`openpyxl`，不会修改项目依赖。
-
-真实附件 Full Dry Run 见 [`full-dry-run-2023-c.md`](full-dry-run-2023-c.md)。
-完整安装分支可在本机用临时 Skill 根目录验证，测试会联网克隆并在结束时清理临时目录：
-
-```powershell
+.\scripts\test_bundled_sources.ps1
+.\scripts\test_bootstrap_bundle.ps1
+.\scripts\test_bootstrap.ps1
+.\scripts\test_bootstrap_default_root.ps1
 .\scripts\test_bootstrap_install.ps1
+.\scripts\test_bundle_docs.ps1
 ```
 
-仓库 CI 会运行 Python 单元测试、脚本编译、Bootstrap 缺失测试和 `git diff --check`；真实安装测试保留为本机显式运行，避免 CI 因外部 GitHub 网络或上游仓库暂时不可用而误报。
+The upstream Solver and Paper entry points remain separate. Python/scientific-computing dependencies are not installed by bootstrap.
 
-## 前置条件与限制
-
-- Windows PowerShell、Git 和可访问 GitHub；
-- 如果 Pro 仓库需要权限，当前 Git 凭据必须已具备访问权；
-- 安装完成后重启或刷新 Codex Skill discovery，确保新入口进入当前会话；
-- Bootstrap 不自动安装 Python 科学计算依赖，因为它们属于执行环境而非 Skill 本体。
