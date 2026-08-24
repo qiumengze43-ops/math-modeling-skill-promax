@@ -93,7 +93,7 @@ fixture\upstream-skills\math-modeling-skills\skills\math-modeling-solver\SKILL.m
 fixture\upstream-skills\math-modeling-skills\skills\math-modeling-paper\SKILL.md
 ```
 
-Assert that read-only mode fails when discovery links are absent, `-Register` creates three junctions and reports `3/3 READY`, a second registration is idempotent, and an unrelated existing directory causes a non-zero conflict while remaining intact.
+Assert that read-only mode fails when discovery links are absent, `-Register` creates four junctions and reports `4/4 READY`, a second registration is idempotent, and an unrelated existing directory causes a non-zero conflict while remaining intact.
 
 - [ ] **Step 2: Run the focused tests and verify they fail**
 
@@ -154,7 +154,7 @@ Accept an existing junction whose resolved full target equals the source full pa
 
 - [ ] **Step 4: Keep default validation read-only and preserve status output**
 
-Default execution validates sources and existing discovery links. `-Register` performs registration before the final validation pass. Report `READY <name>`, `MISSING <name>`, or `CONFLICT <name>` and finish with `3/3 READY` only when all three are valid.
+Default execution validates sources and existing discovery links. `-Register` performs registration before the final validation pass. Report `READY <name>`, `MISSING <name>`, or `CONFLICT <name>` and finish with `4/4 READY` only when all four are valid.
 
 - [ ] **Step 5: Run focused tests and verify green**
 
@@ -269,7 +269,7 @@ In a temporary Skill root, run:
 .\scripts\bootstrap.ps1 -SkillsRoot $temporaryRoot -Register
 ```
 
-Expected: `3/3 READY`, three junctions target the repository-local sources, and a second run is idempotent.
+Expected: `4/4 READY`, four junctions target the repository-local sources, and a second run is idempotent.
 
 - [ ] **Step 5: Commit verification-only adjustments if needed**
 

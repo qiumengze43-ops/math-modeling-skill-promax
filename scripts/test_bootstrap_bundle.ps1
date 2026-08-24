@@ -6,6 +6,7 @@ $fixtureRoot = Join-Path ([System.IO.Path]::GetTempPath()) ('promax-bootstrap-fi
 $skillsRoot = Join-Path ([System.IO.Path]::GetTempPath()) ('promax-bootstrap-skills-' + [guid]::NewGuid().ToString('N'))
 
 $definitions = @(
+    @{ Name = 'math-modeling-promax'; RelativePath = 'skills\math-modeling-promax' },
     @{ Name = 'math-modeling-skill'; RelativePath = 'upstream-skills\math-modeling-skill' },
     @{ Name = 'math-modeling-solver'; RelativePath = 'upstream-skills\math-modeling-skills\skills\math-modeling-solver' },
     @{ Name = 'math-modeling-paper'; RelativePath = 'upstream-skills\math-modeling-skills\skills\math-modeling-paper' }
@@ -24,7 +25,7 @@ function Invoke-Bootstrap([string]$SourceRoot, [string]$DiscoveryRoot, [bool]$Do
         $output = @($_)
     }
     $joined = $output -join [Environment]::NewLine
-    $exitCode = if ($joined -match '3/3 READY') { 0 } else { 1 }
+    $exitCode = if ($joined -match '4/4 READY') { 0 } else { 1 }
     [pscustomobject]@{
         Output = $joined
         ExitCode = $exitCode
@@ -52,7 +53,7 @@ description: fixture
     }
 
     $registered = Invoke-Bootstrap $fixtureRoot $skillsRoot $true
-    if ($registered.ExitCode -ne 0 -or $registered.Output -notmatch '3/3 READY') {
+    if ($registered.ExitCode -ne 0 -or $registered.Output -notmatch '4/4 READY') {
         throw "Bootstrap registration failed: $($registered.Output)"
     }
 
@@ -65,7 +66,7 @@ description: fixture
     }
 
     $second = Invoke-Bootstrap $fixtureRoot $skillsRoot $true
-    if ($second.ExitCode -ne 0 -or $second.Output -notmatch '3/3 READY') {
+    if ($second.ExitCode -ne 0 -or $second.Output -notmatch '4/4 READY') {
         throw "Repeated registration was not idempotent: $($second.Output)"
     }
 

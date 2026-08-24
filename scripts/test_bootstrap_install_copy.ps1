@@ -6,6 +6,7 @@ $fixtureRoot = Join-Path ([System.IO.Path]::GetTempPath()) ('promax-copy-fixture
 $skillsRoot = Join-Path ([System.IO.Path]::GetTempPath()) ('promax-copy-skills-' + [guid]::NewGuid().ToString('N'))
 
 $definitions = @(
+    @{ Name = 'math-modeling-promax'; RelativePath = 'skills\math-modeling-promax' },
     @{ Name = 'math-modeling-skill'; RelativePath = 'upstream-skills\math-modeling-skill' },
     @{ Name = 'math-modeling-solver'; RelativePath = 'upstream-skills\math-modeling-skills\skills\math-modeling-solver' },
     @{ Name = 'math-modeling-paper'; RelativePath = 'upstream-skills\math-modeling-skills\skills\math-modeling-paper' }
@@ -20,7 +21,7 @@ function Invoke-CopyInstall {
     }
     [pscustomobject]@{
         Output = $output -join [Environment]::NewLine
-        Passed = (($output -join [Environment]::NewLine) -match '3/3 READY')
+        Passed = (($output -join [Environment]::NewLine) -match '4/4 READY')
     }
 }
 
@@ -52,6 +53,12 @@ description: fixture
         }
         if (-not (Test-Path -LiteralPath (Join-Path $destination 'SKILL.md'))) {
             throw "Missing copied SKILL.md: $destination"
+        }
+        if ($definition.Name -ne 'math-modeling-promax') {
+            $description = [IO.File]::ReadAllText((Join-Path $destination 'SKILL.md'), (New-Object System.Text.UTF8Encoding($false, $true)))
+            if ($description -notmatch '(?m)^description:.*math-modeling-promax.*') {
+                throw "Copied child Skill description is missing mandatory router prefix: $destination"
+            }
         }
     }
 

@@ -8,10 +8,10 @@ try {
     New-Item -ItemType Directory -Force -Path $skillsRoot | Out-Null
     $output = @(& $bootstrap -ProjectRoot $projectRoot -SkillsRoot $skillsRoot -Register 2>&1)
     $joined = $output -join [Environment]::NewLine
-    if ($joined -notmatch '3/3 READY') {
-        throw ("Bootstrap registration did not report 3/3 READY{0}{1}" -f [Environment]::NewLine, $joined)
+    if ($joined -notmatch '4/4 READY') {
+        throw ("Bootstrap registration did not report 4/4 READY{0}{1}" -f [Environment]::NewLine, $joined)
     }
-    foreach ($name in @('math-modeling-skill', 'math-modeling-solver', 'math-modeling-paper')) {
+    foreach ($name in @('math-modeling-promax', 'math-modeling-skill', 'math-modeling-solver', 'math-modeling-paper')) {
         $destination = Join-Path $skillsRoot $name
         $item = Get-Item -LiteralPath $destination -Force
         if ($item.LinkType -ne 'Junction') {

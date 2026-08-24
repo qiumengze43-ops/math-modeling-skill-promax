@@ -1,2 +1,19 @@
 __pycache__/
 *.py[cod]
+# Python and local environments
+.pytest_cache/
+.mypy_cache/
+.venv/
+# Test and build artifacts
+coverage/
+htmlcov/
+test-results/
+reports/
+*.log
+*.tmp
+*.temp
+tmp-*/
+# OS files
+Thumbs.db
+.DS_Store
+venv/

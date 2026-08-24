@@ -1,14 +1,14 @@
 # Mathematical Modeling Project Orchestration
 
-This repository is a project-local orchestration layer for CUMCM, MCM, and ICM mathematical-modeling work. It does not contain a third mathematical-modeling Skill and must not copy or vendor upstream Skill knowledge bases.
+This repository is the portable source bundle for the global `math-modeling-promax` router and three independent mathematical-modeling Skills. The router is installed globally from `skills/math-modeling-promax/SKILL.md`; it is not a merged copy of the upstream Skills and must route all downstream calls.
 
 ## Orchestrator and upstream Skill routing
 
-1. Codex plus this `AGENTS.md` is the orchestrator. It decides the current gate, required artifacts, and which upstream capability is needed.
+1. The globally installed `math-modeling-promax` Skill is the mandatory entry point. In this repository, `AGENTS.md` supplies the project-specific gate and artifact contracts; together they decide the current gate, required artifacts, and which downstream capability is needed.
 2. Invoke `math-modeling-skill` for evidence-boundary analysis, real-world mechanism and dependency analysis, structurally similar case retrieval, candidate-model comparison, modeling audit, validation/sensitivity planning, and defensible innovation planning. Its source repository is `skillforCUMCM/math-modeling-skill-pro`.
 3. Invoke `math-modeling-solver` for detailed method references, algorithm cookbooks, Python/MATLAB scaffolds, solver guidance, and implementation-oriented validation methods.
 4. Invoke `math-modeling-paper` for paper structure, abstract, figures, memo/letter, citation, formatting, and final writing support after the modeling record is ready.
-5. Invoke upstream Skills directly. Do not merge them, reproduce their references locally, or preload their complete case/reference collections.
+5. The router invokes the three independent Skills only when needed. Do not bypass `math-modeling-promax` to call a lower Skill directly. Do not merge them, reproduce their references locally, or preload their complete case/reference collections.
 6. Historical award papers and case cards are structural analogues, not templates to copy and not proof that a model is universally superior.
 7. Do not add another mathematical-modeling Skill unless a concrete unsolved capability gap has first been documented in the project record and the existing Skills plus orchestration rules demonstrably cannot cover it.
 
@@ -100,9 +100,9 @@ Before paper writing, every material claim must be traceable:
 
 The final audit also checks that:
 
-- `AGENTS.md` remains the orchestrator;
+- the global `math-modeling-promax` Skill remains the mandatory router and `AGENTS.md` remains the project-specific contract;
 - the upstream Skills remain independent and are called only when needed;
-- no project-local mathematical-modeling `SKILL.md` was created;
+- the router and the three lower Skills remain independent; no merged project-local mathematical-modeling knowledge base was created;
 - no upstream knowledge base, case library, or code collection was copied into this repository;
 - all placeholders and untested claims are removed or explicitly marked as reusable template fields;
 - the Git diff is intentional and whitespace-clean.

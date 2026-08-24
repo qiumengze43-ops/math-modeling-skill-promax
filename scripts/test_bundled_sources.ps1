@@ -2,6 +2,7 @@ $ErrorActionPreference = 'Stop'
 
 $projectRoot = Split-Path -Parent $PSScriptRoot
 $expected = @(
+    @{ Name = 'math-modeling-promax'; RelativePath = 'skills\math-modeling-promax\SKILL.md' },
     @{ Name = 'math-modeling-skill'; RelativePath = 'upstream-skills\math-modeling-skill\SKILL.md' },
     @{ Name = 'math-modeling-solver'; RelativePath = 'upstream-skills\math-modeling-skills\skills\math-modeling-solver\SKILL.md' },
     @{ Name = 'math-modeling-paper'; RelativePath = 'upstream-skills\math-modeling-skills\skills\math-modeling-paper\SKILL.md' }

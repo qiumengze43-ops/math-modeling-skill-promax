@@ -62,7 +62,7 @@ checks:
 1. both submodule worktrees are populated;
 2. all three repository-local `SKILL.md` files exist and declare the expected names;
 3. each discovery entry under the selected Skill root resolves to the expected repository-local target;
-4. the final state is reported as `3/3 READY` or with actionable diagnostics.
+4. the final state is reported as `4/4 READY` or with actionable diagnostics.
 
 The default Skill root remains `~/.agents/skills`, with `-SkillsRoot` available for tests and non-default installations.
 

@@ -11,6 +11,10 @@ $ErrorActionPreference = 'Stop'
 
 $definitions = @(
     [ordered]@{
+        Name = 'math-modeling-promax'
+        RelativePath = 'skills\math-modeling-promax'
+    },
+    [ordered]@{
         Name = 'math-modeling-skill'
         RelativePath = 'upstream-skills\math-modeling-skill'
     },
@@ -38,6 +42,40 @@ function Get-SkillName([string]$SkillPath) {
         return $null
     }
     return $match.Matches[0].Groups[1].Value.Trim()
+}
+
+function Get-SkillDescription([string]$SkillPath) {
+    $skillFile = Join-Path $SkillPath 'SKILL.md'
+    if (-not (Test-Path -LiteralPath $skillFile)) {
+        return $null
+    }
+    $utf8 = New-Object System.Text.UTF8Encoding($false, $true)
+    $text = [IO.File]::ReadAllText($skillFile, $utf8)
+    $match = [regex]::Match($text, '(?m)^description:\s*(.+)$')
+    if (-not $match) {
+        return $null
+    }
+    return $match.Groups[1].Value.Trim()
+}
+
+function Apply-DescriptionOverlay([string]$SkillPath, [string]$SkillName) {
+    if ($SkillName -eq 'math-modeling-promax') {
+        return
+    }
+    $skillFile = Join-Path $SkillPath 'SKILL.md'
+    $utf8 = New-Object System.Text.UTF8Encoding($false, $true)
+    $text = [IO.File]::ReadAllText($skillFile, $utf8)
+    $prefix = 'Use only when routed by math-modeling-promax; do not invoke this downstream Skill directly. '
+    $match = [regex]::Match($text, '(?m)^description:\s*(.+)$')
+    if (-not $match) {
+        throw "Missing description frontmatter for ${SkillName}: $skillFile"
+    }
+    if ($match.Groups[1].Value.StartsWith($prefix, [System.StringComparison]::Ordinal)) {
+        return
+    }
+    $replacement = 'description: ' + $prefix + $match.Groups[1].Value
+    $updated = $text.Substring(0, $match.Index) + $replacement + $text.Substring($match.Index + $match.Length)
+    [IO.File]::WriteAllText($skillFile, $updated, $utf8)
 }
 
 function Initialize-Upstreams {
@@ -73,8 +111,15 @@ function Test-ExpectedPhysicalCopy([System.IO.FileSystemInfo]$Item, [string]$Exp
     if ($null -eq $Item -or $Item.LinkType) {
         return $false
     }
-    return (Get-SkillName $Item.FullName) -eq $ExpectedName
+    if ((Get-SkillName $Item.FullName) -ne $ExpectedName) {
+        return $false
+    }
+    if ($ExpectedName -eq 'math-modeling-promax') {
+        return $true
+    }
+    return (Get-SkillDescription $Item.FullName) -like 'Use only when routed by math-modeling-promax;*'
 }
+
 
 function Get-DiscoveryState([string]$Destination, [string]$Source, [string]$Name) {
     $item = Get-Item -LiteralPath $Destination -Force -ErrorAction SilentlyContinue
@@ -105,6 +150,7 @@ function Install-SkillCopy([string]$Source, [string]$Destination) {
     Get-ChildItem -LiteralPath $Source -Force | ForEach-Object {
         Copy-Item -LiteralPath $_.FullName -Destination $Destination -Recurse -Force
     }
+    Apply-DescriptionOverlay $Destination (Get-SkillName $Destination)
 }
 
 try {
@@ -173,7 +219,7 @@ try {
         throw 'Run with -InstallCopy to install full Skills globally.'
     }
 
-    Write-Output '3/3 READY'
+    Write-Output ("{0}/{0} READY" -f $definitions.Count)
 }
 catch {
     throw $_.Exception.Message

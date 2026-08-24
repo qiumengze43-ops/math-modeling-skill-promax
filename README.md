@@ -1,12 +1,14 @@
 # Mathematical Modeling Zero-to-Ready
 
-Promax is a project-level **Skill Bundle + Orchestrator** for CUMCM, MCM, and ICM work. It owns the G1-G6 workflow and reusable modeling records; it is not a fourth mathematical-modeling Skill.
+Promax is a portable source bundle for a global **router Skill plus three independent upstream Skills** for CUMCM, MCM, and ICM work. The router owns the G1-G6 workflow; the three domain Skills remain separate and are only reached through the router.
 
 ## Bundle layout
 
 ```text
 .
 |-- AGENTS.md
+|-- skills/
+|   `-- math-modeling-promax/SKILL.md
 |-- upstream-skills/
 |   |-- math-modeling-skill/
 |   `-- math-modeling-skills/
@@ -30,13 +32,14 @@ cd math-modeling-skill-promax
 .\scripts\bootstrap.ps1 -InitializeUpstreams -InstallCopy
 ```
 
-This copies the complete three Skill directories into the global Codex discovery directory:
+This copies the complete four Skill directories, including the global Promax router, into the global Codex discovery directory:
 
 ```text
 C:\Users\<user>\.agents\skills\
-├── math-modeling-skill\
-├── math-modeling-solver\
-└── math-modeling-paper\
+|-- math-modeling-promax\  # global router; mandatory entry point
+|-- math-modeling-skill\
+|-- math-modeling-solver\
+`-- math-modeling-paper\
 ```
 
 These are physical folders, not junctions. The project remains the portable source bundle; the global directory is the installed copy.
@@ -56,7 +59,9 @@ These are physical folders, not junctions. The project remains the portable sour
 
 The old `-Register` flag remains only as a junction-compatibility command. It is not the recommended installation mode.
 
-Only the three named mathematical-modeling directories are replaced by `-InstallCopy`; other global Skills are untouched.
+Only the four named Promax directories are replaced by `-InstallCopy`; other global Skills are untouched. The installed `math-modeling-promax` router must be the entry point; do not invoke the three lower Skills directly.
+
+During `-InstallCopy`, the three lower global `SKILL.md` descriptions receive the prefix `Use only when routed by math-modeling-promax; do not invoke this downstream Skill directly.` The upstream submodule files remain unchanged.
 
 ## Modeling workflow
 

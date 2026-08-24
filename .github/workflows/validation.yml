@@ -10,6 +10,8 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
+        with:
+          submodules: recursive
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -24,13 +26,17 @@ jobs:
         shell: pwsh
         run: python -m py_compile scripts/extract_cumcm2023c_sales.py scripts/full_dry_run.py scripts/smoke_test_milp.py scripts/test_full_dry_run.py
 
-      - name: Run Bootstrap missing-entry test
+      - name: Run Bootstrap and routing tests
         shell: pwsh
-        run: ./scripts/test_bootstrap.ps1
-
-      - name: Check Bootstrap default root
-        shell: pwsh
-        run: ./scripts/test_bootstrap_default_root.ps1
+        run: |
+          ./scripts/test_global_router.ps1
+          ./scripts/test_bundled_sources.ps1
+          ./scripts/test_bootstrap_install_copy.ps1
+          ./scripts/test_bootstrap_bundle.ps1
+          ./scripts/test_bootstrap_install.ps1
+          ./scripts/test_bootstrap.ps1
+          ./scripts/test_bootstrap_default_root.ps1
+          ./scripts/test_bundle_docs.ps1
 
       - name: Check diff formatting
         shell: pwsh
