@@ -1,6 +1,6 @@
 # Mathematical Modeling Workflow
 
-本文件是项目级 Gate 的操作契约。`AGENTS.md` 负责总路由；本文件说明每个阶段应读写什么，以及何时调用哪个上游 Skill。
+本文件是项目级 Gate 的操作契约。全局 `math-modeling-promax` Skill 是必经路由入口；`AGENTS.md` 提供本项目的 gate 和文件契约。本文件说明每个阶段应读写什么，以及路由器何时调用哪个下游 Skill。
 
 ## Gate 总览
 
@@ -15,7 +15,7 @@
 | G6 | 优点、限制和安全决策边界 | `validation_and_limits.md` | `math-modeling-skill` |
 | Paper | 摘要、论文、图表、Memo/Letter 和格式 | 已验证 modeling 记录 | `math-modeling-paper` |
 
-`优先 Skill` 不是硬绑定。Codex 根据当前问题决定是否调用；不需要的 references 不预加载。
+`优先 Skill` 是路由器在当前阶段选择的下游能力，不是绕过路由器的直接调用许可。Codex 根据当前问题决定是否调用；不需要的 references 不预加载。
 
 ## G1 — 现实机制与依赖
 

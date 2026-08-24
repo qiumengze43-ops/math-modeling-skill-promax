@@ -1,99 +1,226 @@
 [CmdletBinding()]
 param(
-    [string]$SkillsRoot = (Join-Path $env:USERPROFILE '.codex\skills'),
-    [switch]$InstallMissing
+    [string]$SkillsRoot = (Join-Path $env:USERPROFILE '.agents\skills'),
+    [switch]$InitializeUpstreams,
+    [switch]$Register,
+    [switch]$InstallCopy,
+    [string]$ProjectRoot = (Split-Path -Parent $PSScriptRoot)
 )
 
 $ErrorActionPreference = 'Stop'
 
 $definitions = @(
-    [ordered]@{ Name = 'math-modeling-skill'; PathCandidates = @('math-modeling-skill', 'math-modeling-skill-pro'); Repo = 'skillforCUMCM/math-modeling-skill-pro'; SourcePath = '.' },
-    [ordered]@{ Name = 'math-modeling-solver'; PathCandidates = @('math-modeling-solver'); Repo = 'Lupynow/math-modeling-skills'; SourcePath = 'skills/math-modeling-solver' },
-    [ordered]@{ Name = 'math-modeling-paper'; PathCandidates = @('math-modeling-paper'); Repo = 'Lupynow/math-modeling-skills'; SourcePath = 'skills/math-modeling-paper' }
+    [ordered]@{
+        Name = 'math-modeling-promax'
+        RelativePath = 'skills\math-modeling-promax'
+    },
+    [ordered]@{
+        Name = 'math-modeling-skill'
+        RelativePath = 'upstream-skills\math-modeling-skill'
+    },
+    [ordered]@{
+        Name = 'math-modeling-solver'
+        RelativePath = 'upstream-skills\math-modeling-skills\skills\math-modeling-solver'
+    },
+    [ordered]@{
+        Name = 'math-modeling-paper'
+        RelativePath = 'upstream-skills\math-modeling-skills\skills\math-modeling-paper'
+    }
 )
 
-function Get-SkillName([string]$skillPath) {
-    $skillFile = Join-Path $skillPath 'SKILL.md'
-    if (-not (Test-Path -LiteralPath $skillFile)) { return $null }
+function Get-NormalizedPath([string]$Path) {
+    return ([System.IO.Path]::GetFullPath($Path)).TrimEnd('\')
+}
+
+function Get-SkillName([string]$SkillPath) {
+    $skillFile = Join-Path $SkillPath 'SKILL.md'
+    if (-not (Test-Path -LiteralPath $skillFile)) {
+        return $null
+    }
     $match = Select-String -LiteralPath $skillFile -Pattern '^name:\s*(.+?)\s*$' | Select-Object -First 1
-    if (-not $match) { return $null }
+    if (-not $match) {
+        return $null
+    }
     return $match.Matches[0].Groups[1].Value.Trim()
 }
 
-function Get-SkillPath([hashtable]$definition) {
-    foreach ($candidate in $definition.PathCandidates) {
-        $path = Join-Path $SkillsRoot $candidate
-        if ((Get-SkillName $path) -eq $definition.Name) { return $path }
+function Get-SkillDescription([string]$SkillPath) {
+    $skillFile = Join-Path $SkillPath 'SKILL.md'
+    if (-not (Test-Path -LiteralPath $skillFile)) {
+        return $null
     }
-    return $null
+    $utf8 = New-Object System.Text.UTF8Encoding($false, $true)
+    $text = [IO.File]::ReadAllText($skillFile, $utf8)
+    $match = [regex]::Match($text, '(?m)^description:\s*(.+)$')
+    if (-not $match) {
+        return $null
+    }
+    return $match.Groups[1].Value.Trim()
 }
 
-function Test-Skill([hashtable]$definition) {
-    return $null -ne (Get-SkillPath $definition)
+function Apply-DescriptionOverlay([string]$SkillPath, [string]$SkillName) {
+    if ($SkillName -eq 'math-modeling-promax') {
+        return
+    }
+    $skillFile = Join-Path $SkillPath 'SKILL.md'
+    $utf8 = New-Object System.Text.UTF8Encoding($false, $true)
+    $text = [IO.File]::ReadAllText($skillFile, $utf8)
+    $prefix = 'Use only when routed by math-modeling-promax; do not invoke this downstream Skill directly. '
+    $match = [regex]::Match($text, '(?m)^description:\s*(.+)$')
+    if (-not $match) {
+        throw "Missing description frontmatter for ${SkillName}: $skillFile"
+    }
+    if ($match.Groups[1].Value.StartsWith($prefix, [System.StringComparison]::Ordinal)) {
+        return
+    }
+    $replacement = 'description: ' + $prefix + $match.Groups[1].Value
+    $updated = $text.Substring(0, $match.Index) + $replacement + $text.Substring($match.Index + $match.Length)
+    [IO.File]::WriteAllText($skillFile, $updated, $utf8)
 }
 
-function Install-Skill([hashtable]$definition) {
-    $tempRoot = Join-Path ([System.IO.Path]::GetTempPath()) ('math-modeling-bootstrap-' + [guid]::NewGuid().ToString('N'))
-    $repoRoot = Join-Path $tempRoot 'repo'
-    $destination = Join-Path $SkillsRoot $definition.Name
-    New-Item -ItemType Directory -Force -Path $tempRoot | Out-Null
-    try {
-        if (Test-Path -LiteralPath $destination) {
-            throw "Destination already exists but failed validation: $destination"
+function Initialize-Upstreams {
+    $output = @(& git -C $ProjectRoot submodule update --init --recursive 2>&1)
+    if ($LASTEXITCODE -ne 0) {
+        throw ("Git submodule initialization failed:{0}{1}" -f [Environment]::NewLine, ($output -join [Environment]::NewLine))
+    }
+}
+
+function Resolve-SkillSource([hashtable]$Definition) {
+    $source = Join-Path $ProjectRoot $Definition.RelativePath
+    if (-not (Test-Path -LiteralPath $source)) {
+        throw "Missing bundled Skill source for $($Definition.Name): $source. Run with -InitializeUpstreams."
+    }
+    if ((Get-SkillName $source) -ne $Definition.Name) {
+        throw "Bundled Skill name mismatch for $($Definition.Name): $source"
+    }
+    return (Get-NormalizedPath $source)
+}
+
+function Test-ExpectedJunction([System.IO.FileSystemInfo]$Item, [string]$ExpectedTarget) {
+    if ($null -eq $Item -or $Item.LinkType -ne 'Junction') {
+        return $false
+    }
+    $target = @($Item.Target) | Select-Object -First 1
+    if ([string]::IsNullOrWhiteSpace([string]$target)) {
+        return $false
+    }
+    return (Get-NormalizedPath ([string]$target)) -eq (Get-NormalizedPath $ExpectedTarget)
+}
+
+function Test-ExpectedPhysicalCopy([System.IO.FileSystemInfo]$Item, [string]$ExpectedName) {
+    if ($null -eq $Item -or $Item.LinkType) {
+        return $false
+    }
+    if ((Get-SkillName $Item.FullName) -ne $ExpectedName) {
+        return $false
+    }
+    if ($ExpectedName -eq 'math-modeling-promax') {
+        return $true
+    }
+    return (Get-SkillDescription $Item.FullName) -like 'Use only when routed by math-modeling-promax;*'
+}
+
+
+function Get-DiscoveryState([string]$Destination, [string]$Source, [string]$Name) {
+    $item = Get-Item -LiteralPath $Destination -Force -ErrorAction SilentlyContinue
+    if ($null -eq $item) {
+        return [ordered]@{ State = 'MISSING'; Item = $null }
+    }
+    if ((Test-ExpectedJunction $item $Source) -or (Test-ExpectedPhysicalCopy $item $Name)) {
+        return [ordered]@{ State = 'READY'; Item = $item }
+    }
+    return [ordered]@{ State = 'CONFLICT'; Item = $item }
+}
+
+function Assert-SafeDestination([string]$Destination) {
+    $root = Get-NormalizedPath $SkillsRoot
+    $full = Get-NormalizedPath $Destination
+    if (-not $full.StartsWith($root + '\', [System.StringComparison]::OrdinalIgnoreCase)) {
+        throw "Refusing out-of-scope Skill destination: $full"
+    }
+}
+
+function Install-SkillCopy([string]$Source, [string]$Destination) {
+    Assert-SafeDestination $Destination
+    $existing = Get-Item -LiteralPath $Destination -Force -ErrorAction SilentlyContinue
+    if ($null -ne $existing) {
+        Remove-Item -LiteralPath $Destination -Recurse -Force
+    }
+    New-Item -ItemType Directory -Force -Path $Destination | Out-Null
+    Get-ChildItem -LiteralPath $Source -Force | ForEach-Object {
+        Copy-Item -LiteralPath $_.FullName -Destination $Destination -Recurse -Force
+    }
+    Apply-DescriptionOverlay $Destination (Get-SkillName $Destination)
+}
+
+try {
+    if ($InitializeUpstreams) {
+        Initialize-Upstreams
+    }
+
+    $resolved = @()
+    foreach ($definition in $definitions) {
+        $resolved += [pscustomobject]@{
+            Definition = $definition
+            Source = Resolve-SkillSource $definition
+            Destination = Join-Path $SkillsRoot $definition.Name
         }
+    }
+
+    if ($InstallCopy) {
         New-Item -ItemType Directory -Force -Path $SkillsRoot | Out-Null
-        $previousErrorAction = $ErrorActionPreference
-        try {
-            $ErrorActionPreference = 'Continue'
-            $cloneOutput = @(& git clone --depth 1 ("https://github.com/{0}.git" -f $definition.Repo) $repoRoot 2>&1)
-        }
-        finally {
-            $ErrorActionPreference = $previousErrorAction
-        }
-        if ($LASTEXITCODE -ne 0) {
-            throw "Git clone failed for $($definition.Repo): $($cloneOutput -join "`n")"
-        }
-        $source = if ($definition.SourcePath -eq '.') { $repoRoot } else { Join-Path $repoRoot $definition.SourcePath }
-        if (-not (Test-Path -LiteralPath (Join-Path $source 'SKILL.md'))) {
-            throw "SKILL.md not found at $source"
-        }
-        New-Item -ItemType Directory -Force -Path $destination | Out-Null
-        Get-ChildItem -LiteralPath $source -Force | Where-Object { $_.Name -ne '.git' } | Copy-Item -Destination $destination -Recurse -Force
-    }
-    finally {
-        if (Test-Path -LiteralPath $tempRoot) {
-            Remove-Item -LiteralPath $tempRoot -Recurse -Force
+        foreach ($entry in $resolved) {
+            Install-SkillCopy $entry.Source $entry.Destination
         }
     }
-}
+    elseif ($Register) {
+        New-Item -ItemType Directory -Force -Path $SkillsRoot | Out-Null
+        foreach ($entry in $resolved) {
+            $existing = Get-Item -LiteralPath $entry.Destination -Force -ErrorAction SilentlyContinue
+            if ($null -eq $existing) {
+                New-Item -ItemType Junction -Path $entry.Destination -Target $entry.Source | Out-Null
+            }
+        }
+    }
 
-$missing = @($definitions | Where-Object { -not (Test-Skill $_) })
-if ($missing.Count -gt 0 -and -not $InstallMissing) {
-    $missing | ForEach-Object { Write-Output ("MISSING {0} (source: {1})" -f $_.Name, $_.Repo) }
-    Write-Error 'Run with -InstallMissing after confirming network and repository access.'
-    exit 2
-}
-
-if ($InstallMissing) {
-    foreach ($definition in $missing) {
-        Write-Output ("INSTALLING {0} from {1}" -f $definition.Name, $definition.Repo)
-        Install-Skill $definition
+    $states = @()
+    foreach ($entry in $resolved) {
+        $state = Get-DiscoveryState $entry.Destination $entry.Source $entry.Definition.Name
+        $states += [pscustomobject]@{
+            Name = $entry.Definition.Name
+            Source = $entry.Source
+            Destination = $entry.Destination
+            State = $state.State
+        }
     }
-}
 
-$failed = @()
-foreach ($definition in $definitions) {
-    $path = Get-SkillPath $definition
-    if ($path) {
-        Write-Output ("READY {0} (path: {1}; source: {2})" -f $definition.Name, $path, $definition.Repo)
+    $failed = @()
+    foreach ($entry in $states) {
+        if ($entry.State -eq 'READY') {
+            Write-Output ("READY {0} (path: {1}; source: {2})" -f $entry.Name, $entry.Destination, $entry.Source)
+        }
+        elseif ($entry.State -eq 'MISSING') {
+            Write-Output ("MISSING {0} (expected global path: {1})" -f $entry.Name, $entry.Destination)
+            $failed += $entry.Name
+        }
+        else {
+            Write-Output ("CONFLICT {0} (path: {1}; expected source: {2})" -f $entry.Name, $entry.Destination, $entry.Source)
+            $failed += $entry.Name
+        }
     }
-    else {
-        Write-Output ("NOT READY {0}" -f $definition.Name)
-        $failed += $definition.Name
-    }
-}
 
-if ($failed.Count -gt 0) {
-    exit 1
+    if ($failed.Count -gt 0) {
+        if ($InstallCopy) {
+            throw 'Global copy installation did not produce valid physical Skill directories.'
+        }
+        if ($Register) {
+            throw 'Global junction registration encountered a conflicting deployment.'
+        }
+        throw 'Run with -InstallCopy to install full Skills globally.'
+    }
+
+    Write-Output ("{0}/{0} READY" -f $definitions.Count)
 }
-Write-Output '3/3 READY'
+catch {
+    throw $_.Exception.Message
+}
