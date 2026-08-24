@@ -40,7 +40,7 @@ C:\Users\<用户>\.agents\skills\
 在目标电脑执行一次：
 
 ```powershell
-git clone --recurse-submodules <仓库地址>
+git clone --recurse-submodules https://github.com/qiumengze43-ops/math-modeling-skill-promax.git
 cd math-modeling-skill-promax
 .\scripts\bootstrap.ps1 -InitializeUpstreams -InstallCopy
 ```

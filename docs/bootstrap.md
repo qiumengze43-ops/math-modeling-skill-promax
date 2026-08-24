@@ -18,7 +18,7 @@ This repository records one exact installation version: the parent Git commit an
 Run once from the repository root:
 
 ```powershell
-git clone --recurse-submodules <promax-repository>
+git clone --recurse-submodules https://github.com/qiumengze43-ops/math-modeling-skill-promax.git
 cd math-modeling-skill-promax
 .\scripts\bootstrap.ps1 -InitializeUpstreams -InstallCopy
 ```

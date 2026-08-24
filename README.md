@@ -29,7 +29,7 @@ The two upstream repositories are pinned as Git submodules. Solver and Paper rem
 Clone the project with its submodules:
 
 ```powershell
-git clone --recurse-submodules <promax-repository>
+git clone --recurse-submodules https://github.com/qiumengze43-ops/math-modeling-skill-promax.git
 cd math-modeling-skill-promax
 .\scripts\bootstrap.ps1 -InitializeUpstreams -InstallCopy
 ```
@@ -53,7 +53,7 @@ This installs the exact version recorded by this repository: the parent Git comm
 Run this once on the computer where you want to use this version:
 
 ```powershell
-git clone --recurse-submodules <promax-repository>
+git clone --recurse-submodules https://github.com/qiumengze43-ops/math-modeling-skill-promax.git
 cd math-modeling-skill-promax
 .\scripts\bootstrap.ps1 -InitializeUpstreams -InstallCopy
 ```
