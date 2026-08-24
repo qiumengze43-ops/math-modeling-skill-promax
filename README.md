@@ -48,7 +48,7 @@ Register the three repository-local Skills into the Codex discovery root with di
 
 The default discovery root is `C:\Users\<user>\.agents\skills`. Use `-SkillsRoot` for another root or for tests. Registration keeps one physical copy of each Skill.
 
-Bootstrap never silently overwrite[s] an existing directory or link. A valid junction to the expected target is accepted; a conflicting, broken, or unrelated entry is reported and left untouched.
+Bootstrap never silently overwrite an existing directory or link. A valid junction to the expected target is accepted; a conflicting, broken, or unrelated entry is reported and left untouched.
 
 ## Modeling workflow
 
@@ -66,4 +66,3 @@ The upstream routing remains:
 - `math-modeling-paper`: paper structure, abstract, figures, citations, memo/letter, and formatting after modeling records are validated.
 
 Read `docs/workflow.md` for the G1-G6 gate contracts and `docs/bootstrap.md` for bootstrap diagnostics.
-

@@ -94,4 +94,3 @@ finally {
 }
 
 Write-Output 'BOOTSTRAP_BUNDLE_CHECK_PASS'
-

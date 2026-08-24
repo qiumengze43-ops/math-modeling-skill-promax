@@ -42,7 +42,7 @@ The default root is `C:\Users\<user>\.agents\skills`. Ordinary validation and re
 - `MISSING <name>`: the source or discovery entry is absent; use `-InitializeUpstreams` for missing submodules or `-Register` for missing links.
 - `CONFLICT <name>`: an existing directory, file, broken link, or link to another target occupies the path.
 
-Bootstrap never deletes, moves, or overwrite[s] an existing discovery entry. It accepts an existing correct junction and leaves every conflict untouched. Resolve a conflict manually, then rerun the command.
+Bootstrap never deletes, moves, or overwrite an existing discovery entry. It accepts an existing correct junction and leaves every conflict untouched. Resolve a conflict manually, then rerun the command.
 
 ## Verification
 
@@ -58,4 +58,3 @@ Run the local checks without network access:
 ```
 
 The upstream Solver and Paper entry points remain separate. Python/scientific-computing dependencies are not installed by bootstrap.
-

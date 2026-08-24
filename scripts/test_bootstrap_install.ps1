@@ -26,4 +26,3 @@ finally {
 }
 
 Write-Output 'BOOTSTRAP_REGISTER_CHECK_PASS'
-

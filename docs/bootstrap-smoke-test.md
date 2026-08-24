@@ -25,4 +25,3 @@ These tests use local fixture data or the pinned submodules. They verify source 
 ## Ownership boundary
 
 `AGENTS.md` remains the controller for G1-G6 routing. Upstream Skills own their own instructions and references. No local upstream knowledge base, case collection, code-template collection, or mathematical-modeling `SKILL.md` is created here.
-
