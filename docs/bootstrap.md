@@ -11,41 +11,34 @@ Promax is a portable source bundle for a global router Skill plus three independ
 | `math-modeling-solver` | `upstream-skills/math-modeling-skills/skills/math-modeling-solver` | `Lupynow/math-modeling-skills` |
 | `math-modeling-paper` | `upstream-skills/math-modeling-skills/skills/math-modeling-paper` | `Lupynow/math-modeling-skills` |
 
-## Recommended global installation
+## Install this pinned version
 
-From the project root:
+This repository records one exact installation version: the parent Git commit and both submodule pointers are fixed. Bootstrap does not pull or track newer upstream versions.
+
+Run once from the repository root:
 
 ```powershell
-# First computer setup
+git clone --recurse-submodules <promax-repository>
+cd math-modeling-skill-promax
 .\scripts\bootstrap.ps1 -InitializeUpstreams -InstallCopy
-
-# Refresh an existing installation
-.\scripts\bootstrap.ps1 -InstallCopy
-
-# Check only; no writes
-.\scripts\bootstrap.ps1
 ```
 
-The default global root is `C:\Users\<user>\.agents\skills`. Use `-SkillsRoot` for a test or another Codex installation:
-
-```powershell
-.\scripts\bootstrap.ps1 -InstallCopy -SkillsRoot 'C:\Users\<user>\.agents\skills'
-```
+The default destination is `C:\Users\<user>\.agents\skills`.
 
 ## Install behavior
 
-`-InstallCopy` validates all four bundled `SKILL.md` files, removes only the four named old deployment directories, and copies every file from each repository-local Skill source into the global destination. Re-running it produces a clean physical installation and removes stale files from an older version.
+`-InstallCopy` validates all four bundled `SKILL.md` files, removes only the four named old deployment directories, and copies every file from each repository-local Skill source into the global destination. This produces a clean physical installation of the pinned version.
 
 The installed `math-modeling-promax` router is the mandatory entry point and explicitly forbids direct calls to the three lower Skills. It never touches unrelated directories such as `pdf-efficient-reader`, `hf-cli`, or `grilling`.
 
 For physical installs, bootstrap also overlays each lower Skill description with `Use only when routed by math-modeling-promax; do not invoke this downstream Skill directly.` This overlay is applied only to the global copy, so the upstream submodules stay pristine.
 
-The legacy `-Register` flag still creates junctions for compatibility, but it is not needed for normal deployment.
+
 
 ## Result states
 
 - `READY <name>`: the global Skill directory is valid.
-- `MISSING <name>`: source or global directory is absent; use `-InitializeUpstreams -InstallCopy`.
+- `MISSING <name>`: source or global directory is absent; rerun the same pinned-version installation command shown above.
 - `CONFLICT <name>`: a non-matching deployment occupies the expected path during validation.
 
 ## Verification

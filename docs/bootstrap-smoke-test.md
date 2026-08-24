@@ -26,4 +26,4 @@ The checks verify source names, complete physical copies, stale-file replacement
 
 ## Ownership boundary
 
-The project owns the router source and pinned upstream sources. The global directory owns the installed copies used by Codex. Updating the project does not change the global installation until `-InstallCopy` is run again.
+The project owns the router source and pinned upstream sources. The global directory owns the installed copies used by Codex. This smoke test covers only the pinned version installed from the current repository snapshot; it does not track upstream updates.

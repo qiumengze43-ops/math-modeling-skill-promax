@@ -1,3 +1,5 @@
+[中文版](README.zh-CN.md) | English | [MIT License](LICENSE)
+
 # Mathematical Modeling Zero-to-Ready
 
 Promax is a portable source bundle for a global **router Skill plus three independent upstream Skills** for CUMCM, MCM, and ICM work. The router owns the G1-G6 workflow; the three domain Skills remain separate and are only reached through the router.
@@ -44,24 +46,27 @@ C:\Users\<user>\.agents\skills\
 
 These are physical folders, not junctions. The project remains the portable source bundle; the global directory is the installed copy.
 
-## Bootstrap modes
+## Installation scope
+
+This installs the exact version recorded by this repository: the parent Git commit and both submodule pointers are fixed. The installer does not pull or track newer upstream versions.
+
+Run this once on the computer where you want to use this version:
 
 ```powershell
-# Validate current global installation without writing
-.\scripts\bootstrap.ps1
-
-# Install or refresh complete physical Skill folders globally
-.\scripts\bootstrap.ps1 -InstallCopy
-
-# Initialize missing submodules and install globally
+git clone --recurse-submodules <promax-repository>
+cd math-modeling-skill-promax
 .\scripts\bootstrap.ps1 -InitializeUpstreams -InstallCopy
 ```
 
-The old `-Register` flag remains only as a junction-compatibility command. It is not the recommended installation mode.
+The command installs four physical directories under `C:\Users\<user>\.agents\skills\`. It replaces only the four Promax directories and leaves unrelated global Skills untouched. The installed `math-modeling-promax` router is the required entry point.
 
-Only the four named Promax directories are replaced by `-InstallCopy`; other global Skills are untouched. The installed `math-modeling-promax` router must be the entry point; do not invoke the three lower Skills directly.
+The three lower global `SKILL.md` descriptions receive a route-only description overlay during installation; the upstream submodule files remain unchanged.
 
-During `-InstallCopy`, the three lower global `SKILL.md` descriptions receive the prefix `Use only when routed by math-modeling-promax; do not invoke this downstream Skill directly.` The upstream submodule files remain unchanged.
+## Verify installation
+
+```powershell
+.\scripts\bootstrap.ps1
+```
 
 ## Modeling workflow
 
