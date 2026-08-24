@@ -5,7 +5,7 @@ $files = @(
     (Join-Path $projectRoot 'README.md'),
     (Join-Path $projectRoot 'docs\bootstrap.md')
 )
-$required = @('upstream-skills', '-Register', '-InitializeUpstreams', 'overwrite')
+$required = @('upstream-skills', '-InstallCopy', '-InitializeUpstreams', 'physical')
 
 foreach ($file in $files) {
     $text = Get-Content -Raw -LiteralPath $file

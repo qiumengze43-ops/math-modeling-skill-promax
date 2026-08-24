@@ -1,6 +1,6 @@
 # Mathematical Modeling Zero-to-Ready
 
-Promax is a project-level **Skill Bundle + Orchestrator** for CUMCM, MCM, and ICM work. It owns the G1-G6 workflow and the reusable modeling records; it is not a fourth mathematical-modeling Skill.
+Promax is a project-level **Skill Bundle + Orchestrator** for CUMCM, MCM, and ICM work. It owns the G1-G6 workflow and reusable modeling records; it is not a fourth mathematical-modeling Skill.
 
 ## Bundle layout
 
@@ -8,8 +8,8 @@ Promax is a project-level **Skill Bundle + Orchestrator** for CUMCM, MCM, and IC
 .
 |-- AGENTS.md
 |-- upstream-skills/
-|   |-- math-modeling-skill/                 # skillforCUMCM/math-modeling-skill-pro
-|   `-- math-modeling-skills/               # Lupynow/math-modeling-skills
+|   |-- math-modeling-skill/
+|   `-- math-modeling-skills/
 |       `-- skills/
 |           |-- math-modeling-solver/
 |           `-- math-modeling-paper/
@@ -18,37 +18,45 @@ Promax is a project-level **Skill Bundle + Orchestrator** for CUMCM, MCM, and IC
 `-- scripts/
 ```
 
-The two upstream repositories are pinned as Git submodules. Solver and Paper remain two independent Skill entry points inside the Lupynow repository. Promax never merges, copies, or edits their upstream knowledge bases.
+The two upstream repositories are pinned as Git submodules. Solver and Paper remain independent Skill entry points inside the Lupynow repository.
 
-## First-time setup
+## Install globally on a new computer
 
-Clone with the upstream sources:
+Clone the project with its submodules:
 
 ```powershell
 git clone --recurse-submodules <promax-repository>
 cd math-modeling-skill-promax
-.\scripts\bootstrap.ps1 -InitializeUpstreams -Register
+.\scripts\bootstrap.ps1 -InitializeUpstreams -InstallCopy
 ```
 
-If the repository was cloned without submodules, run `git submodule update --init --recursive` directly or use the explicit `-InitializeUpstreams` flag.
+This copies the complete three Skill directories into the global Codex discovery directory:
 
-## Bootstrap and discovery
+```text
+C:\Users\<user>\.agents\skills\
+├── math-modeling-skill\
+├── math-modeling-solver\
+└── math-modeling-paper\
+```
 
-Routine validation is read-only:
+These are physical folders, not junctions. The project remains the portable source bundle; the global directory is the installed copy.
+
+## Bootstrap modes
 
 ```powershell
+# Validate current global installation without writing
 .\scripts\bootstrap.ps1
+
+# Install or refresh complete physical Skill folders globally
+.\scripts\bootstrap.ps1 -InstallCopy
+
+# Initialize missing submodules and install globally
+.\scripts\bootstrap.ps1 -InitializeUpstreams -InstallCopy
 ```
 
-Register the three repository-local Skills into the Codex discovery root with directory junctions:
+The old `-Register` flag remains only as a junction-compatibility command. It is not the recommended installation mode.
 
-```powershell
-.\scripts\bootstrap.ps1 -Register
-```
-
-The default discovery root is `C:\Users\<user>\.agents\skills`. Use `-SkillsRoot` for another root or for tests. Registration keeps one physical copy of each Skill.
-
-Bootstrap never silently overwrite an existing directory or link. A valid junction to the expected target is accepted; a conflicting, broken, or unrelated entry is reported and left untouched.
+Only the three named mathematical-modeling directories are replaced by `-InstallCopy`; other global Skills are untouched.
 
 ## Modeling workflow
 
@@ -65,4 +73,3 @@ The upstream routing remains:
 - `math-modeling-solver`: detailed methods, algorithms, solver/code scaffolds, and implementation validation;
 - `math-modeling-paper`: paper structure, abstract, figures, citations, memo/letter, and formatting after modeling records are validated.
 
-Read `docs/workflow.md` for the G1-G6 gate contracts and `docs/bootstrap.md` for bootstrap diagnostics.

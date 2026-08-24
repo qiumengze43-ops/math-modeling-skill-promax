@@ -3,6 +3,7 @@ param(
     [string]$SkillsRoot = (Join-Path $env:USERPROFILE '.agents\skills'),
     [switch]$InitializeUpstreams,
     [switch]$Register,
+    [switch]$InstallCopy,
     [string]$ProjectRoot = (Split-Path -Parent $PSScriptRoot)
 )
 
@@ -68,15 +69,42 @@ function Test-ExpectedJunction([System.IO.FileSystemInfo]$Item, [string]$Expecte
     return (Get-NormalizedPath ([string]$target)) -eq (Get-NormalizedPath $ExpectedTarget)
 }
 
-function Get-DiscoveryState([string]$Destination, [string]$Source) {
+function Test-ExpectedPhysicalCopy([System.IO.FileSystemInfo]$Item, [string]$ExpectedName) {
+    if ($null -eq $Item -or $Item.LinkType) {
+        return $false
+    }
+    return (Get-SkillName $Item.FullName) -eq $ExpectedName
+}
+
+function Get-DiscoveryState([string]$Destination, [string]$Source, [string]$Name) {
     $item = Get-Item -LiteralPath $Destination -Force -ErrorAction SilentlyContinue
     if ($null -eq $item) {
         return [ordered]@{ State = 'MISSING'; Item = $null }
     }
-    if (Test-ExpectedJunction $item $Source) {
+    if ((Test-ExpectedJunction $item $Source) -or (Test-ExpectedPhysicalCopy $item $Name)) {
         return [ordered]@{ State = 'READY'; Item = $item }
     }
     return [ordered]@{ State = 'CONFLICT'; Item = $item }
+}
+
+function Assert-SafeDestination([string]$Destination) {
+    $root = Get-NormalizedPath $SkillsRoot
+    $full = Get-NormalizedPath $Destination
+    if (-not $full.StartsWith($root + '\', [System.StringComparison]::OrdinalIgnoreCase)) {
+        throw "Refusing out-of-scope Skill destination: $full"
+    }
+}
+
+function Install-SkillCopy([string]$Source, [string]$Destination) {
+    Assert-SafeDestination $Destination
+    $existing = Get-Item -LiteralPath $Destination -Force -ErrorAction SilentlyContinue
+    if ($null -ne $existing) {
+        Remove-Item -LiteralPath $Destination -Recurse -Force
+    }
+    New-Item -ItemType Directory -Force -Path $Destination | Out-Null
+    Get-ChildItem -LiteralPath $Source -Force | ForEach-Object {
+        Copy-Item -LiteralPath $_.FullName -Destination $Destination -Recurse -Force
+    }
 }
 
 try {
@@ -93,34 +121,30 @@ try {
         }
     }
 
+    if ($InstallCopy) {
+        New-Item -ItemType Directory -Force -Path $SkillsRoot | Out-Null
+        foreach ($entry in $resolved) {
+            Install-SkillCopy $entry.Source $entry.Destination
+        }
+    }
+    elseif ($Register) {
+        New-Item -ItemType Directory -Force -Path $SkillsRoot | Out-Null
+        foreach ($entry in $resolved) {
+            $existing = Get-Item -LiteralPath $entry.Destination -Force -ErrorAction SilentlyContinue
+            if ($null -eq $existing) {
+                New-Item -ItemType Junction -Path $entry.Destination -Target $entry.Source | Out-Null
+            }
+        }
+    }
+
     $states = @()
     foreach ($entry in $resolved) {
-        $state = Get-DiscoveryState $entry.Destination $entry.Source
+        $state = Get-DiscoveryState $entry.Destination $entry.Source $entry.Definition.Name
         $states += [pscustomobject]@{
             Name = $entry.Definition.Name
             Source = $entry.Source
             Destination = $entry.Destination
             State = $state.State
-        }
-    }
-
-    $conflicts = @($states | Where-Object { $_.State -eq 'CONFLICT' })
-    if ($Register -and $conflicts.Count -eq 0) {
-        New-Item -ItemType Directory -Force -Path $SkillsRoot | Out-Null
-        foreach ($entry in $states | Where-Object { $_.State -eq 'MISSING' }) {
-            $parent = Split-Path -Parent $entry.Destination
-            New-Item -ItemType Directory -Force -Path $parent | Out-Null
-            New-Item -ItemType Junction -Path $entry.Destination -Target $entry.Source | Out-Null
-        }
-        $states = @()
-        foreach ($entry in $resolved) {
-            $state = Get-DiscoveryState $entry.Destination $entry.Source
-            $states += [pscustomobject]@{
-                Name = $entry.Definition.Name
-                Source = $entry.Source
-                Destination = $entry.Destination
-                State = $state.State
-            }
         }
     }
 
@@ -130,7 +154,7 @@ try {
             Write-Output ("READY {0} (path: {1}; source: {2})" -f $entry.Name, $entry.Destination, $entry.Source)
         }
         elseif ($entry.State -eq 'MISSING') {
-            Write-Output ("MISSING {0} (expected link: {1})" -f $entry.Name, $entry.Destination)
+            Write-Output ("MISSING {0} (expected global path: {1})" -f $entry.Name, $entry.Destination)
             $failed += $entry.Name
         }
         else {
@@ -140,10 +164,13 @@ try {
     }
 
     if ($failed.Count -gt 0) {
-        if ($conflicts.Count -gt 0) {
-            throw 'Bootstrap stopped without replacing conflicting discovery entries.'
+        if ($InstallCopy) {
+            throw 'Global copy installation did not produce valid physical Skill directories.'
         }
-        throw 'Run with -Register to create missing discovery junctions.'
+        if ($Register) {
+            throw 'Global junction registration encountered a conflicting deployment.'
+        }
+        throw 'Run with -InstallCopy to install full Skills globally.'
     }
 
     Write-Output '3/3 READY'
@@ -151,3 +178,4 @@ try {
 catch {
     throw $_.Exception.Message
 }
+
