@@ -54,4 +54,3 @@ The legacy `-Register` flag still creates junctions for compatibility, but it is
 .\scripts\test_bootstrap_install.ps1
 .\scripts\test_bundle_docs.ps1
 ```
-

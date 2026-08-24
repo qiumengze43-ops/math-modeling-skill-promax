@@ -25,4 +25,3 @@ The checks verify source names, complete physical copies, stale-file replacement
 ## Ownership boundary
 
 The project owns orchestration and pinned upstream sources. The global directory owns the installed copies used by Codex. Updating the project does not change the global installation until `-InstallCopy` is run again.
-

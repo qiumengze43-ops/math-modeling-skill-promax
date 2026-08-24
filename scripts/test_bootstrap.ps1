@@ -14,4 +14,3 @@ finally {
     if (Test-Path -LiteralPath $skillsRoot) { Remove-Item -LiteralPath $skillsRoot -Recurse -Force }
 }
 Write-Output 'BOOTSTRAP_MISSING_CHECK_PASS'
-

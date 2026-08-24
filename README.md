@@ -72,4 +72,3 @@ The upstream routing remains:
 - `math-modeling-skill`: mechanism, evidence boundary, dependencies, candidate comparison, audit, validation, and defensible innovation;
 - `math-modeling-solver`: detailed methods, algorithms, solver/code scaffolds, and implementation validation;
 - `math-modeling-paper`: paper structure, abstract, figures, citations, memo/letter, and formatting after modeling records are validated.
-
