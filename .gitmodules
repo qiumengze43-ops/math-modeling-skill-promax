@@ -1,0 +1,6 @@
+[submodule "upstream-skills/math-modeling-skill"]
+	path = upstream-skills/math-modeling-skill
+	url = https://github.com/skillforCUMCM/math-modeling-skill-pro.git
+[submodule "upstream-skills/math-modeling-skills"]
+	path = upstream-skills/math-modeling-skills
+	url = https://github.com/Lupynow/math-modeling-skills.git
