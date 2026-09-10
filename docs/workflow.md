@@ -126,6 +126,8 @@ Implementation Card 只是教材式算法介绍，或者缺少可复现的输出
 
 执行阶段必须保存配置、随机种子、版本、输入摘要、原始输出和可行性/收敛信息。执行结果不能绕过 G5 直接进入论文。
 
+正式证据运行在成功后写入 Router 的 **Run Ledger**；每个数值结果必须关联 `run_id`、输入、命令、输出与可行性/收敛记录。`FINAL` 仅表示预期用途，不等于科学有效性。
+
 对于优化问题，独立检查单位、硬约束、软约束、可行性、solver 状态和参数不确定性。对于预测问题，独立检查切分、泄漏、误差和外推边界。
 
 ## G5 — 验证与不确定性
@@ -137,6 +139,8 @@ Implementation Card 只是教材式算法介绍，或者缺少可复现的输出
 ### 输出
 
 `validation_and_limits.md` 中的 Validation Matrix、Assumption–Result–Limitation Matrix，以及已执行的 correctness、empirical、comparison/ablation 和 uncertainty 证据。
+
+每个 material claim 还须在 **Claim Ledger** 中记录 `claim_id`、来源 `run_id` 或可核查推导、验证引用及不确定性/限制。
 
 ### PASS
 
@@ -179,6 +183,8 @@ Pro 负责 claim-evidence 和验证设计；Solver 按需提供具体误差、�
 ## Paper
 
 只有 G1-G6 的记录可供论文提取。论文阶段调用 `math-modeling-paper`，但不得在写作时临时发明新的假设、验证结果、数值、strength 或 limitation。发现缺项时返回相应 Gate 更新记录。
+
+正式图表进入 Paper 前必须有 **Figure Contract**，并只引用 `SUPPORTED` 的 Claim Ledger 条目。图表渲染和 visual review 仍由 `math-modeling-paper` 负责。交付包使用 **Delivery Manifest** 与 `delivery_check.py` 检查可读性、必需文件和安全路径；通过仅证明包完整性。
 
 ## Final Audit
 

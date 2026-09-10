@@ -41,4 +41,15 @@ Do not present a model name, numerical result, strength, limitation, or paper cl
 
 When the current workspace contains the Promax records, update the relevant `modeling/*.md` file before advancing a gate. Otherwise, preserve the same trace in the current project's own records.
 
+## Evidence execution route
+
+When a run, claim, formal figure, or delivery package becomes formal evidence, read `references/evidence-execution-contracts.md` and identify the required record before handoff:
+
+- **G4 / Execution:** record the successful command, inputs, configuration, outputs, and solver evidence in the **Run Ledger**.
+- **G5 / G6:** link every material conclusion and its validation or limitation to a **Claim Ledger** entry.
+- **Paper:** pass only `SUPPORTED` claims and a completed **Figure Contract** to `math-modeling-paper`; that downstream Skill retains figure rendering and visual review.
+- **Delivery:** validate the declared package with a **Delivery Manifest** and `scripts/delivery_check.py`.
+
+These records are operational traceability, not proof of mathematical validity or visual quality. Do not load them for early-stage work that is not producing formal evidence.
+
 
