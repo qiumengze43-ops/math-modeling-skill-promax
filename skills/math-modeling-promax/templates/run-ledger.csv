@@ -1,0 +1,1 @@
+run_id,status,purpose,gate,created_at,code_ref,command,input_artifacts,config_artifact,output_artifacts,seed_or_determinism,exit_status,feasibility_or_convergence,notes

@@ -24,6 +24,8 @@ Maintain these files as the source of truth for the current competition:
 
 Do not put a real competition's numerical results into the reusable examples. Replace every example record before using the project for a submission.
 
+For formal evidence, use the Router-owned Run Ledger, Claim Ledger, Figure Contract, and Delivery Manifest under `skills/math-modeling-promax/`. A formal run must have a unique `run_id`; a paper claim must be `SUPPORTED`; a formal figure must have a completed Figure Contract; and a package-integrity pass is not a scientific or visual-quality pass.
+
 ## Gate workflow
 
 The current stage must be explicit. A gate may be `PASS`, `PASS WITH RISK`, or `FAIL` only. `FAIL` blocks the next gate. `PASS WITH RISK` permits continuation only when the unresolved risk is recorded in `modeling/validation_and_limits.md`.

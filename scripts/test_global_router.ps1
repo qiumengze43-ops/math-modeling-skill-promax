@@ -19,6 +19,10 @@ foreach ($required in @(
     'math-modeling-paper',
     'ROUTE_REQUIRED',
     'NO_DIRECT_DOWNSTREAM_CALLS',
+    'Run Ledger',
+    'Claim Ledger',
+    'Figure Contract',
+    'Delivery Manifest',
     $requiredChinese,
     $requiredRule
 )) {
